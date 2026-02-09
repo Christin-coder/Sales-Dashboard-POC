@@ -22,8 +22,8 @@ jobs:
       - name: Restore & Build API
         # This tells GitHub to specifically look in your SalesApi folder
         run: |
-          dotnet restore SalesApi/
-          dotnet build SalesApi/ --configuration Release
+          dotnet restore SalesAPI/
+          dotnet build SalesAPI/ --configuration Release
 
   # --- Job 2: Build the Angular 21 Frontend ---
   build-angular:
