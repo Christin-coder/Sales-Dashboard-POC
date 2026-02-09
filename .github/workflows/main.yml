@@ -1,0 +1,45 @@
+name: Full Stack CI Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # --- Job 1: Build the .NET 9 Backend ---
+  build-dotnet:
+    name: Build .NET API
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore & Build API
+        # This tells GitHub to specifically look in your SalesApi folder
+        run: |
+          dotnet restore SalesApi/
+          dotnet build SalesApi/ --configuration Release
+
+  # --- Job 2: Build the Angular 21 Frontend ---
+  build-angular:
+    name: Build Angular App
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Optimal for Angular 21
+
+      - name: Install & Build Frontend
+        # We use 'working-directory' to tell GitHub to stay inside the Angular folder
+        working-directory: ./SalesDashboard
+        run: |
+          npm install
+          npm run build -- --configuration production
