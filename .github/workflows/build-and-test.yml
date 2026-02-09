@@ -1,0 +1,42 @@
+name: CI Build and Test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # JOB 1: Build the .NET Backend
+  backend-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore Dependencies
+        run: dotnet restore ./SalesAPI/SalesAPI.csproj
+
+      - name: Build
+        run: dotnet build ./SalesAPI/SalesAPI.csproj --no-restore --configuration Release
+
+  # JOB 2: Build the Angular Frontend
+  frontend-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Angular 21 works best with Node 20+
+
+      - name: Install Dependencies
+        run: npm install --prefix ./SalesDashboard
+
+      - name: Build Angular
+        run: npm run build --prefix ./SalesDashboard -- --configuration production
