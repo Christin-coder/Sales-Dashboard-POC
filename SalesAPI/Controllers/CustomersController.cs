@@ -8,7 +8,7 @@ namespace SalesAPI.Controllers;
 [Route("api/[controller]")] // This makes the URL: api/customers
 [ApiController]
 
-public class CustomersController(AppDbContext context) : ControllerBase
+public class CustomersController(AppDbContext context, ILogger<CustomersController> logger) : ControllerBase
 {
 
     [HttpGet]
@@ -69,7 +69,7 @@ public class CustomersController(AppDbContext context) : ControllerBase
 
         context.Customers.Add(customer);
         await context.SaveChangesAsync();
-
+        logger.LogInformation("Created new customer with ID {CustomerID} and Name {FullName}", customer.CustomerID, customer.FullName);
         return CreatedAtAction(nameof(GetCustomer), new { id = customer.CustomerID }, MapToDTO(customer));
     }
     // PUT: api/customers/5 (Update an existing customer)
@@ -84,6 +84,7 @@ public class CustomersController(AppDbContext context) : ControllerBase
         customer.Email = customerDto.Email;
 
         await context.SaveChangesAsync();
+        logger.LogInformation("Updated customer with ID {CustomerID} to Name {FullName} and Email {Email}", customer.CustomerID, customer.FullName, customer.Email);
         return NoContent();
     }
 
@@ -96,6 +97,7 @@ public class CustomersController(AppDbContext context) : ControllerBase
         try {
             context.Customers.Remove(customer);
             await context.SaveChangesAsync();
+            logger.LogInformation("Deleted customer with ID {CustomerID}", id);
             return NoContent();
         }
         catch (DbUpdateException) {

@@ -3,13 +3,14 @@ using Microsoft.EntityFrameworkCore;
 using SalesAPI.Data;
 using SalesAPI.Models;
 using SalesAPI.DTOs;
+using Serilog.Core;
 
 
 namespace SalesAPI.Controllers;
 
 [Route("api/[Controller]")] // This makes the URL: api/sales
 [ApiController]
-public class SalesController(AppDbContext context) : ControllerBase
+public class SalesController(AppDbContext context, ILogger<SalesController> logger) : ControllerBase
 {
     [HttpGet]
     public async Task<ActionResult<PagedResponse<SaleDTO>>> GetSales(
@@ -93,6 +94,7 @@ public class SalesController(AppDbContext context) : ControllerBase
             .Include(s => s.Product)
             .SingleOrDefaultAsync(s => s.SaleID == sale.SaleID);
 
+        logger.LogInformation("Created new sale with ID {SaleID} for CustomerID {CustomerID} and ProductID {ProductID}", sale.SaleID, sale.CustomerID, sale.ProductID);
         return savedSale == null ? NotFound() : CreatedAtAction(nameof(GetSale), new { id = sale.SaleID }, MapToDTO(savedSale));
     }
 
@@ -104,6 +106,7 @@ public class SalesController(AppDbContext context) : ControllerBase
 
         context.Sales.Remove(sale);
         await context.SaveChangesAsync();
+        logger.LogInformation("Deleted sale with ID {SaleID}", id);
         return NoContent();
     }
 

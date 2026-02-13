@@ -8,7 +8,7 @@ namespace SalesAPI.Controllers;
 
 [Route("api/[controller]")] // This makes the URL: api/products
 [ApiController]
-public class ProductsController(AppDbContext context) : ControllerBase
+public class ProductsController(AppDbContext context, ILogger<ProductsController> logger) : ControllerBase
 {
 
     // 1. GET: api/products (Fetch all products)
@@ -72,7 +72,7 @@ public class ProductsController(AppDbContext context) : ControllerBase
 
         context.Products.Add(product);
         await context.SaveChangesAsync();
-
+        logger.LogInformation("Created new product with ID {ProductID} and Name {ProductName}", product.ProductID, product.ProductName);
         return CreatedAtAction(nameof(GetProduct), new { id = product.ProductID }, MapToDTO(product));
     }
     // 3. PUT: api/products/5 (Update an existing product)
@@ -87,7 +87,7 @@ public class ProductsController(AppDbContext context) : ControllerBase
         product.Price = productDto.Price;
 
         await context.SaveChangesAsync();
-
+        logger.LogInformation("Updated product with ID {ProductID} to Name {ProductName} and Price {Price}", product.ProductID, product.ProductName, product.Price);
         return NoContent();
     }
 
@@ -100,6 +100,7 @@ public class ProductsController(AppDbContext context) : ControllerBase
         try {
             context.Products.Remove(product);
             await context.SaveChangesAsync();
+            logger.LogInformation("Deleted product with ID {ProductID}", id);
             return NoContent();
         }
         catch (DbUpdateException) {
